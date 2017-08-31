@@ -5,6 +5,7 @@
 # To check wiring is correct ensure the order of movement as above is correct
 
 import piconzero as pz, time
+import hcsr04
 
 #======================================================================
 # Reading single character by forcing stdin to raw mode
@@ -38,6 +39,7 @@ def readkey(getchar_fn=None):
 # End of single character reading
 #======================================================================
 
+tooClose = 15
 speed = 60
 
 print("Tests the motors by using the arrow keys to control")
@@ -48,10 +50,13 @@ print("Press Ctrl-C to end")
 print()
 
 pz.init()
+hcsr04.init()
 
 # main loop
 try:
-    while True:
+    distance = int(hcsr04.getDistance())
+    print("Distance:", distance)
+    while distance>tooClose:
         keyp = readkey()
         if keyp == 'w' or ord(keyp) == 16:
             pz.forward(speed)
@@ -76,9 +81,12 @@ try:
             print('Stop')
         elif ord(keyp) == 3:
             break
+        distance = int(hcsr04.getDistance())
+        print("Distance:", distance)
 
 except KeyboardInterrupt:
     print
 
 finally:
     pz.cleanup()
+    hcsr04.cleanup()
